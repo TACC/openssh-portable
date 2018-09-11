@@ -52,7 +52,6 @@
 #include "pathnames.h"
 #include "sshbuf.h"
 #include "ssherr.h"
-#include "buffer.h"
 #include "canohost.h"
 
 #ifdef GSSAPI
