@@ -242,11 +242,9 @@ stop_and_join_pregen_threads(struct ssh_aes_ctr_ctx_mt *c)
 		pthread_cancel(c->tid[i]);
 	}
 	for (i = 0; i < numkq; i++) {
-		if (&c->q[i]) { /* make sure it exists - numkq should handle this but there is some weirdness happening */
-			pthread_mutex_lock(&c->q[i].lock);
-			pthread_cond_broadcast(&c->q[i].cond);
-			pthread_mutex_unlock(&c->q[i].lock);
-		}
+		pthread_mutex_trylock(&c->q[i].lock);
+		pthread_cond_broadcast(&c->q[i].cond);
+		pthread_mutex_unlock(&c->q[i].lock);
 	}
 	for (i = 0; i < cipher_threads; i++) {
 		if (pthread_kill(c->tid[i], 0) != 0)
