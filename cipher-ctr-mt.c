@@ -242,14 +242,16 @@ stop_and_join_pregen_threads(struct ssh_aes_ctr_ctx_mt *c)
 		pthread_cancel(c->tid[i]);
 	}
 	for (i = 0; i < numkq; i++) {
-		pthread_mutex_lock(&c->q[i].lock);
-		pthread_cond_broadcast(&c->q[i].cond);
-		pthread_mutex_unlock(&c->q[i].lock);
+		if (&c->q[i]) { /* make sure it exists - numkq should handle this but there is some weirdness happening */
+			pthread_mutex_lock(&c->q[i].lock);
+			pthread_cond_broadcast(&c->q[i].cond);
+			pthread_mutex_unlock(&c->q[i].lock);
+		}
 	}
 	for (i = 0; i < cipher_threads; i++) {
 		if (pthread_kill(c->tid[i], 0) != 0)
 			debug3("AES-CTR MT pthread_join failure: Invalid thread id %lu in %s", c->tid[i], __FUNCTION__);
-		else {
+	        else { 
 			debug ("Joining %lu (%d, %d)", c->tid[i], c->struct_id, c->id[i]);
 			pthread_join(c->tid[i], NULL);
 		}
@@ -277,7 +279,7 @@ thread_loop(void *x)
 #ifdef CIPHER_THREAD_STATS
 	pthread_cleanup_push(thread_loop_stats, &stats);
 #endif
-
+	
 	/* Thread local copy of AES key */
 	memcpy(&key, &c->aes_ctx, sizeof(key));
 
