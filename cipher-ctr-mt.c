@@ -242,7 +242,7 @@ stop_and_join_pregen_threads(struct ssh_aes_ctr_ctx_mt *c)
 		pthread_cancel(c->tid[i]);
 	}
 	for (i = 0; i < numkq; i++) {
-		pthread_mutex_lock(&c->q[i].lock);
+		pthread_mutex_trylock(&c->q[i].lock);
 		pthread_cond_broadcast(&c->q[i].cond);
 		pthread_mutex_unlock(&c->q[i].lock);
 	}
